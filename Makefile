@@ -18,3 +18,12 @@ data/violations.json: data $(DATASETS_RAW)
 
 data/%: data-raw/%
 	python manage.py dataset -p $< -v data/violations.json -o $@
+
+
+BENCHMARKS=$(shell ls data/beanstalk)
+
+summary:
+	mkdir -p summary
+
+summary/%: data/beanstalk/%
+	python manage.py summarize -p data/beanstalk/$* -o summary/$*

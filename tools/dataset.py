@@ -24,6 +24,12 @@ def dataset_iter(func, base: str) -> None:
                 func(base, device, run)
 
 
+def _get_reentrant(benchmark):
+    with open("data/violations.json") as f:
+        indices = np.array(json.load(f)[benchmark])
+    return indices[:, 0] == indices[:, 1]
+
+
 def _main(args):
     with open("data/violations.json") as f:
         violations = {
@@ -58,4 +64,6 @@ def _main(args):
 
     os.makedirs(args.out, exist_ok=True)
     for k, v in stacked.items():
-        np.savez(os.path.join(args.out, k + '.npz'), **v)
+        np.savez(
+            os.path.join(args.out, k + '.npz'),
+            reentrant=_get_reentrant(k), **v)

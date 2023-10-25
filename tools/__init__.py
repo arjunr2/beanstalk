@@ -1,9 +1,9 @@
 """Beanstalk scripts."""
 
-from . import violations
-from . import dataset
+from . import violations, dataset, summarize
 
 commands = {
     "violations": violations,
-    "dataset": dataset
+    "dataset": dataset,
+    "summarize": summarize
 }
