@@ -27,3 +27,17 @@ summary:
 
 summary/%: data/beanstalk/%
 	python manage.py summarize -p data/beanstalk/$* -o summary/$*
+
+simulations:
+	mkdir -p simulations
+
+simulations/density.npz: data/beanstalk
+	python manage.py simulate2 -p $< -o simulations/density.npz
+
+simulations/%: data/%
+	python manage.py simulate -p data/$* -o simulations/$*.npz
+
+FIGURES=$(shell ls plot)
+
+figures/%.pdf: plot/%.py
+	python plot/$*.py

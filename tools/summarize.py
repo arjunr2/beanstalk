@@ -3,7 +3,6 @@
 import numpy as np
 from jax import random, vmap
 from jax import numpy as jnp
-import json
 
 from jaxtyping import UInt, Bool, Array, Float
 
@@ -14,7 +13,7 @@ def _parse(p):
     p.add_argument("-s", "--seed", help="Random seed.", type=int, default=42)
     p.add_argument(
         "--quantile", type=float, nargs='+',
-        default=[0.005, 0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99, 0.995],
+        default=[0.05, 0.25, 0.5, 0.75, 0.95],
         help="Confidence interval bounds.")
     p.add_argument(
         "--samples", type=int, default=10000,
@@ -51,44 +50,48 @@ def _get_summary_matrix(path) -> tuple[
 def heisenness_ci(
     key: random.PRNGKeyArray,
     alpha: Float[Array, "Nv Dd"], beta: Float[Array, "Nv Dd"],
-    delta: Float[Array, "Nd"], 
+    delta: Float[Array, "Nd"],
     q: Float[Array, "Nq"], samples: int = 10000, correction: int = 2
-) -> tuple[Float[Array, "Nq"], Float[Array, "Nq"], Float[Array, "Nq"]]:
+):
     """Get quantiles for the heisen-ness of a bug."""
     keys = jnp.array(random.split(key, alpha.size)).reshape((*alpha.shape, -1))
 
     def _beta_rvs(k, a, b):
         return random.beta(k, a, b, shape=(samples,))
 
-    Xd2_samples = vmap(vmap(_beta_rvs))(keys, alpha, beta)
-    X_samples: Float[Array, "Nv Nd S"] = (
-        Xd2_samples / delta[None, :, None]**(correction))
-    X_mean = jnp.mean(X_samples.reshape(-1, samples), axis=0)
+    # Sample X_tilde from beta posterior
+    X_tilde: Float[Array, "Nv Nd S"] = vmap(vmap(_beta_rvs))(keys, alpha, beta)
+    # Compute X from X_tilde
+    X: Float[Array, "Nv Nd S"] = (
+        X_tilde / delta[None, :, None]**(correction))
+    # X_tilde is conditioned on the constraint that 0 <= X <= 1; apply that
+    # here.
+    X = X.at[X > 1].set(jnp.nan)
 
-    H_net = jnp.std(X_samples.reshape(-1, samples), axis=0) / X_mean
-    H_device = jnp.std(jnp.mean(X_samples, axis=1), axis=0) / X_mean
-    H_density = jnp.std(jnp.mean(X_samples, axis=0), axis=0) / X_mean
+    X_max = jnp.nanmax(X.reshape(-1, samples), axis=0)
+    X_mean = jnp.nanmean(X.reshape(-1, samples), axis=0)
+    heisen_factor = jnp.nanstd(X.reshape(-1, samples), axis=0) / X_mean
     return (
-        jnp.quantile(H_net, q),
-        jnp.quantile(H_device, q),
-        jnp.quantile(H_density, q))
+        jnp.nanquantile(X, q, axis=2),
+        jnp.nanquantile(X_max, q),
+        jnp.quantile(heisen_factor, q))
 
 
 def _main(args):
-    summary, runs, devices, densities, reentrant = _get_summary_matrix(args.path)
+    summary, n, devices, delta, reentrant = _get_summary_matrix(args.path)
 
     # Uniform prior
-    prior_a = 1.0
-    prior_b = 1.0
+    prior_a = 0.1
+    prior_b = 10.0
     # Remove 0 instrumentation data
     K = summary[:, 1:, :]
-    n = runs[:, 1:]
+    n = n[:, 1:]
+    delta = jnp.array(delta[1:] / 100)
     # Target quantiles
     q = jnp.array(args.quantile)
 
-    alpha: UInt[Array, "Nv Nd Nb"] = prior_a + K
-    beta: UInt[Array, "Nv Nd Nb"] = prior_b + n[:, :, None] - K
-    delta: UInt[Array, "Nd"] = densities[1:] / 100
+    alpha: UInt[np.ndarray, "Nv Nd Nb"] = prior_a + K
+    beta: UInt[np.ndarray, "Nv Nd Nb"] = prior_b + n[:, :, None] - K
 
     key = random.PRNGKey(args.seed)
     keys = random.split(key, alpha.shape[-1])
@@ -101,9 +104,9 @@ def _main(args):
             k, a, b, delta=delta, samples=args.samples,
             q=q, correction=1 if r else 2))
 
-    ci_net, ci_device, ci_density = list(zip(*ci))
+    X, X_max, F = list(zip(*ci))
     np.savez(
-        args.out, ci=np.array(ci_net),
-        ci_device=np.array(ci_device), ci_density=np.array(ci_density),
-        K=summary[:, 1:, :], runs=runs, reentrant=reentrant,
-        device=devices, density=densities[1:], q=np.array(args.quantile))
+        args.out, F=np.array(F),
+        X=np.array(X), X_max=jnp.array(X_max),
+        K=K, n=n, reentrant=reentrant,
+        device=devices, delta=delta, q=np.array(args.quantile))
