@@ -28,10 +28,10 @@ order = np.argsort(F)
 def _show(ax, chunks):
     mat = np.concatenate(chunks, axis=0)
     normalized = np.nan_to_num(mat / np.nanmax(mat, axis=1)[:, None])
-    return ax.imshow(normalized[order].T)
+    return ax.imshow(normalized[order].T, aspect='auto')
 
 
-fig, axs = plt.subplots(2, 1, figsize=(15, 4))
+fig, axs = plt.subplots(2, 1, figsize=(15, 5))
 im1 = _show(axs[0], by_device)
 im2 = _show(axs[1], by_density)
 axs[0].set_title("Devices", loc='left')
@@ -49,8 +49,8 @@ for ax in axs:
 
 fig.tight_layout()
 
-fig.subplots_adjust(right=0.93)
-cbar_ax = fig.add_axes([0.95, 0.095, 0.015, 0.81])
+fig.subplots_adjust(right=0.94)
+cbar_ax = fig.add_axes([0.96, 0.075, 0.01, 0.85])
 fig.colorbar(im1, cax=cbar_ax)
 
 

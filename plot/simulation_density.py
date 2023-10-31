@@ -21,29 +21,40 @@ def _plot_ci(
     ax.errorbar(x, middle, yerr=yerr, label=label, capsize=5, **kwargs)
 
 
+names = {
+    "thread": "fibonacci",
+    "thread_lock": "fibonacci-lock",
+    "comp_opt_bug": "comp-opt-bug",
+    "comp_unopt_bug": "comp-unopt-bug",
+    "loop_antidep": "antidep1-orig",
+    "input_dep": "input-dependence-var",
+    "indirect": "indirectaccess1-orig",
+    "lfq": "lock-free-queue"
+}
 beanstalk = np.load("simulations/density.npz")
 baseline = np.load("simulations/baseline.npz")
 benchmarks = list(beanstalk.keys())
 x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-fig, axs = plt.subplots(1, 8, figsize=(16, 3))
+fig, axs = plt.subplots(2, 4, figsize=(12, 5))
 for ax, benchmark in zip(axs.reshape(-1), benchmarks):
     _plot_ci(
         ax, x, beanstalk[benchmark],
         label='Beanstalk', marker='D', linestyle='-', color='C0')
     ax.grid()
     ax.xaxis.set_major_formatter(PercentFormatter())
-    ax.set_title(benchmark.replace(".npz", "").replace("-", "_"))
+    ax.set_title(names[benchmark.replace(".npz", "").replace("-", "_")])
     ax.axhline(
         np.mean(baseline[benchmark][5]),
         color='C1', linestyle='--', label='Baseline', linewidth=2.0)
 
-axs[0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom')
-axs[0].set_xlabel(
+axs[1, 0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom')
+axs[1, 0].set_xlabel(
     "Maximum Allowed Instrumentation Density $\longrightarrow$", loc='left')
-axs[-1].set_yticks([3, 4, 5, 6])
-fig.tight_layout(h_pad=0.0, w_pad=-1.5)
-axs[-1].legend(
-    ncols=2, loc='upper right', frameon=False, bbox_to_anchor=(1.05, -0.1))
+axs[1, 3].set_yticks([3, 4, 5, 6])
+axs[1, 1].set_yticks([45, 50, 55, 60, 65])
+fig.tight_layout(h_pad=0.5, w_pad=0.0)
+axs[-1, -1].legend(
+    ncols=2, loc='upper right', frameon=False, bbox_to_anchor=(1.05, -0.09))
 
 fig.savefig("figures/simulation_density.pdf")

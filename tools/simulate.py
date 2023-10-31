@@ -16,6 +16,7 @@ def _parse(p):
     p.add_argument(
         "-r", "--replicates", help="Number of simulations to run.",
         default=1000, type=int)
+    p.add_argument("-a", "--ablation", default=None, help="Ablation to run.")
 
 
 def _main(args):
@@ -28,6 +29,18 @@ def _main(args):
         t = npz['t']
         bugs = np.unpackbits(
             npz['bugs'], axis=1, count=npz['reentrant'].shape[0])
+
+        if args.ablation == "density":
+            mask = (
+                (npz["device"] == 33) | (npz["device"] == 34)
+                | (npz["device"] == 35))
+            t = t[mask]
+            bugs = bugs[mask]
+        elif args.ablation == "device":
+            mask = (npz["density"] == 100)
+            t = t[mask]
+            bugs = bugs[mask]
+
         return np.array([
             simulate_pool(t, bugs, budget=x * minutes, samples=args.replicates)
             for x in tqdm(args.budget, desc=path)])
