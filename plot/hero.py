@@ -16,7 +16,7 @@ for ax in axs:
 axs[0].set_ylabel(
     "$\longleftarrow$ Different Devices $\longrightarrow$", loc='center')
 axs[0].set_xlabel(
-    "Higher Debugging Intensities $\longrightarrow$", loc='left')
+    "More Intrusive Debugging $\longrightarrow$", loc='left')
 axs[0].text(
     0, 0, "Ordinary Bug", ha='left', va='top', fontsize=14, color='white')
 axs[1].text(
