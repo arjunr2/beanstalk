@@ -17,8 +17,8 @@ by_density = []
 F = []
 for k, v in npz.items():
     by_device.append(
-        np.mean(np.minimum(1.0, v['X'][:, lower]), axis=2)[:, :21])
-    by_density.append(np.mean(np.minimum(1.0, v['X'][:, lower]), axis=1))
+        np.mean(np.minimum(1.0, v['X'][:, median]), axis=2)[:, :21])
+    by_density.append(np.mean(np.minimum(1.0, v['X'][:, median]), axis=1))
     F.append(v['F'][:, median])
 
 F = np.concatenate(F, axis=0)

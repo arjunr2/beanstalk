@@ -15,7 +15,7 @@ def _parse(p):
         default=[1, 2, 5, 10, 15, 30, 60])
     p.add_argument(
         "-r", "--replicates", help="Number of simulations to run.",
-        default=1000, type=int)
+        default=10000, type=int)
     p.add_argument("-a", "--ablation", default=None, help="Ablation to run.")
 
 

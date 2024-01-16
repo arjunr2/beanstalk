@@ -28,7 +28,7 @@ def _plot(ax, path):
     return im
 
 
-fig, ax = plt.subplots(1, 1, figsize=(6.5, 4.5))
+fig, ax = plt.subplots(1, 1, figsize=(6.5, 4.0))
 im = _plot(ax, "summary/thread.npz")
 ax.set_xticks([])
 ax.set_yticks(np.arange(10) * 2 + 1)

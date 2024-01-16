@@ -25,6 +25,12 @@ data/%: data-raw/%
 
 BENCHMARKS=$(shell ls data/beanstalk)
 
+.phony: all-summary
+all-summary: summary \
+	summary/comp-opt-bug.npz summary/comp-unopt-bug.npz summary/indirect.npz \
+	summary/input-dep.npz summary/lfq.npz summary/loop-antidep.npz \
+	summary/thread_lock.npz summary/thread.npz
+
 summary:
 	mkdir -p summary
 
@@ -54,10 +60,10 @@ simulations/abl_density.npz: data/beanstalk
 		--ablation density
 
 simulations/beanstalk.npz: data/beanstalk
-	python manage.py simulate -p data/$* -o simulations/beanstalk.npz
+	python manage.py simulate -p $< -o simulations/beanstalk.npz
 
 simulations/baseline.npz: data/baseline
-	python manage.py simulate -p data/$* -o simulations/baseline.npz
+	python manage.py simulate -p $< -o simulations/baseline.npz
 
 
 # -- Figures ------------------------------------------------------------------

@@ -26,8 +26,8 @@ names = {
     "comp_opt_bug": "comp-opt-bug",
     "comp_unopt_bug": "comp-unopt-bug",
     "loop_antidep": "antidep1-orig",
-    "input_dep": "input-dependence-var",
-    "indirect": "indirectaccess1-orig",
+    "input_dep": "input-dep",
+    "indirect": "indirectaccess",
     "lfq": "lock-free-queue"
 }
 methods = {
@@ -50,7 +50,10 @@ for ax, benchmark in zip(axs.reshape(-1), benchmarks):
     lines = ['-', '--', ':', '-.']
     colors = ['C0', 'C1', 'C2', 'C3']
     for (k, v), m, ls, c in zip(data.items(), markers, lines, colors):
-        _plot_ci(ax, x, v[benchmark], label=k, marker=m, linestyle=ls, color=c)
+        invalid = np.any(v[benchmark] == -1, axis=(1, 2))
+        nbugs = np.sum(v[benchmark], axis=2).astype(np.float32)
+        nbugs[invalid] = np.nan
+        _plot_ci(ax, x, nbugs, label=k, marker=m, linestyle=ls, color=c)
 
     ax.grid()
     ax.set_xticks(np.log(ticks))

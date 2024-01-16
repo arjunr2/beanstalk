@@ -3,8 +3,7 @@
 import numpy as np
 from jax import random, vmap
 from jax import numpy as jnp
-
-from jaxtyping import UInt, Bool, Array, Float
+from jaxtyping import UInt, Bool, Array, Float, Integer
 
 
 def _parse(p):
@@ -49,21 +48,48 @@ def _get_summary_matrix(path) -> tuple[
 
 def heisenness_ci(
     key: random.PRNGKeyArray,
-    alpha: Float[Array, "Nv Dd"], beta: Float[Array, "Nv Dd"],
+    K: Integer[Array, "Nv Nd"], N: Integer[Array, "Nv Nd"],
     delta: Float[Array, "Nd"],
-    q: Float[Array, "Nq"], samples: int = 10000, correction: int = 2
+    q: Float[Array, "Nq"], samples: int = 100000, correction: int = 2
 ):
-    """Get quantiles for the heisen-ness of a bug."""
-    keys = jnp.array(random.split(key, alpha.size)).reshape((*alpha.shape, -1))
+    """Get quantiles for the heisen-ness of a bug.
+    
+    Notes
+    -----
+    Devices (Nv) are always placed on the 0 axis, and densities (Nd) on the 1
+    axis for non-scalar tensors.
+    """
+    keys = jnp.array(random.split(key, K.size)).reshape((*K.shape, -1))
 
     def _beta_rvs(k, a, b):
         return random.beta(k, a, b, shape=(samples,))
 
+    # Beta prior
+    # alpha is chosen so that the mean matches the observed mean under the
+    # prior that F=0, i.e. does not vary based in device or density.
+
+    # Phi: P(M) - probability of activating the probes
+    Phi = delta ** correction
+    # X_null: estimate X based on uniform X assumption using N adjusted for Phi
+    N_adj = jnp.sum(N * Phi[None, :])
+    K_tot = jnp.sum(K)
+    X_null = K_tot / N_adj
+    # Y_null: estimate detection probability based on X_null, Phi
+    Y_null = X_null * Phi[None, :]
+
+    # Beta prior (on Y)
+    # alpha is chosen so that the mean matches the observed Y_null
+    prior_b = 1
+    prior_a = prior_b * Y_null / (1 - Y_null)
+
+    # Update posterior
+    alpha = prior_a + K
+    beta = prior_b + N - K
+
     # Sample X_tilde from beta posterior
     X_tilde: Float[Array, "Nv Nd S"] = vmap(vmap(_beta_rvs))(keys, alpha, beta)
     # Compute X from X_tilde
-    X: Float[Array, "Nv Nd S"] = (
-        X_tilde / delta[None, :, None]**(correction))
+    X: Float[Array, "Nv Nd S"] = X_tilde / Phi[None, :, None]
     # X_tilde is conditioned on the constraint that 0 <= X <= 1; apply that
     # here.
     X = X.at[X > 1].set(jnp.nan)
@@ -80,33 +106,27 @@ def heisenness_ci(
 def _main(args):
     summary, n, devices, delta, reentrant = _get_summary_matrix(args.path)
 
-    # Uniform prior
-    prior_a = 0.1
-    prior_b = 10.0
     # Remove 0 instrumentation data
-    K = summary[:, 1:, :]
-    n = n[:, 1:]
+    K = jnp.array(summary[:, 1:, :])
+    N = jnp.array(n[:, 1:])
     delta = jnp.array(delta[1:] / 100)
     # Target quantiles
     q = jnp.array(args.quantile)
 
-    alpha: UInt[np.ndarray, "Nv Nd Nb"] = prior_a + K
-    beta: UInt[np.ndarray, "Nv Nd Nb"] = prior_b + n[:, :, None] - K
-
     key = random.PRNGKey(args.seed)
-    keys = random.split(key, alpha.shape[-1])
+    keys = random.split(key, K.shape[-1])
 
     # Ordinary enumeration to make sure we don't run out of memory
     ci = []
-    _iter = zip(keys, jnp.rollaxis(alpha, 2), jnp.rollaxis(beta, 2), reentrant)
-    for k, a, b, r in _iter:
+    _iter = zip(keys, jnp.rollaxis(K, 2), reentrant)
+    for key, k, r in _iter:
         ci.append(heisenness_ci(
-            k, a, b, delta=delta, samples=args.samples,
+            key, k, N, delta=delta, samples=args.samples,
             q=q, correction=1 if r else 2))
 
     X, X_max, F = list(zip(*ci))
     np.savez(
         args.out, F=np.array(F),
         X=np.array(X), X_max=jnp.array(X_max),
-        K=K, n=n, reentrant=reentrant,
+        K=K, n=N, reentrant=reentrant,
         device=devices, delta=delta, q=np.array(args.quantile))

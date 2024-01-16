@@ -15,7 +15,7 @@ def _parse(p):
         default=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
     p.add_argument(
         "-r", "--replicates", help="Number of simulations to run.",
-        default=1000, type=int)
+        default=10000, type=int)
 
 
 def _main(args):
