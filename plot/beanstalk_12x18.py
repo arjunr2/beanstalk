@@ -1,4 +1,4 @@
-"""Detectability Profile Poster."""
+"""Detectability Profile Poster (printed version)."""
 
 from matplotlib import pyplot as plt
 import numpy as np

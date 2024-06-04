@@ -1,4 +1,4 @@
-"""Detectability Profile Poster (paper version)."""
+"""Detectability Profile Poster (slide version)."""
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -22,7 +22,7 @@ for k, v in npz.items():
 F = np.array(F)
 order = np.argsort(F)
 
-fig, axs = plt.subplots(13, 11, figsize=(10, 12))
+fig, axs = plt.subplots(8, 17, figsize=(16, 8))
 for i, (idx, ax) in enumerate(zip(order, axs.reshape(-1))):
     ax.imshow(np.nan_to_num(
         rows[idx], nan=0.0, posinf=0.0, neginf=0.0), aspect='auto')
@@ -49,4 +49,4 @@ axs[-1, 0].set_ylabel(
 axs[-1, -1].set_xlabel(
     "$\longleftarrow$ Decreasing Instrumentation Density", loc='right')
 axs[0, 0].set_ylabel("$\longleftarrow$ Different Devices", loc='top')
-fig.savefig("figures/poster.pdf", bbox_inches='tight')
+fig.savefig("figures/poster2.pdf", bbox_inches='tight')
