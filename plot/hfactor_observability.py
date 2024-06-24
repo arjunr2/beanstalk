@@ -30,16 +30,10 @@ for k, v in npz.items():
     mask = np.sum(v['K'], axis=(0, 1)) > 10
     X = X[mask]
     y = y[mask]
-
-    ax.errorbar(
-        X[:, median], y[:, median],
-        yerr=[y[:, median] - y[:, q1], y[:, q3] - y[:, median]],
-        linestyle='', marker='.',
-        label=names[k.replace('.npz', '').replace('-', '_')], linewidth=1.0)
+    ax.scatter(X[:, median], y[:, 0], marker='.', color='C0')
 ax.grid()
 ax.set_ylabel(r"Heisen Factor")
 ax.set_xlabel(r"Best Conditional Observability")
-ax.legend()
-ax.set_yticks([0, 5, 10, 15])
+ax.set_yticks([0, 2.5, 5, 7.5, 10])
 fig.tight_layout()
 fig.savefig("figures/hfactor_observability.pdf")

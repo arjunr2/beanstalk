@@ -3,7 +3,7 @@
 import numpy as np
 from jax import random, vmap
 from jax import numpy as jnp
-from jaxtyping import UInt, Bool, Array, Float, Integer
+from jaxtyping import UInt, Bool, Array, Float, Integer, PRNGKeyArray
 
 
 def _parse(p):
@@ -47,7 +47,7 @@ def _get_summary_matrix(path) -> tuple[
 
 
 def heisenness_ci(
-    key: random.PRNGKeyArray,
+    key: PRNGKeyArray,
     K: Integer[Array, "Nv Nd"], N: Integer[Array, "Nv Nd"],
     delta: Float[Array, "Nd"],
     q: Float[Array, "Nq"], samples: int = 100000, correction: int = 2

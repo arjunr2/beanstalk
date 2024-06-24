@@ -9,14 +9,14 @@ npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
 }
-median = 2
+lower = 0
 
 rows = []
 F = []
 for k, v in npz.items():
     for i in range(v['K'].shape[-1]):
         rows.append(v['K'][:, :, i] / v['n'])
-    F.append(v['F'][:, median])
+    F.append(v['F'][:, lower])
 
 F = np.concatenate(F, axis=0)
 order = np.argsort(F)
