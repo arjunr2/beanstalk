@@ -35,9 +35,9 @@ ax.set_yticks(np.arange(10) * 2 + 1)
 ax.set_yticklabels(["{}%".format(x + 10) for x in np.arange(10) * 10])
 ax.set_ylabel(
     r"$\longleftarrow$ Increasing Instrumentation Density",
-    loc='top', fontsize=12)
+    loc='top', fontsize=11)
 ax.set_xlabel(
     r"Bugs sorted by Decreasing Detectability $\longrightarrow$",
-    loc='left', fontsize=12)
+    loc='left', fontsize=11)
 fig.tight_layout()
 fig.savefig("figures/example.pdf")

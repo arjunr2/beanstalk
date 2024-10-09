@@ -34,14 +34,14 @@ methods = {
     "Beanstalk": "simulations/beanstalk.npz",
     "Device Diversity Only": "simulations/abl_device.npz",
     "Instrumentation Diversity Only": "simulations/abl_density.npz",
-    "Homogenous Baseline": "simulations/baseline.npz"
+    "Homogeneous Baseline": "simulations/baseline.npz"
 }
 data = {k: np.load(v) for k, v in methods.items()}
 
 benchmarks = list(data["Beanstalk"].keys())
 budgets = [1, 2, 5, 10, 15, 30, 60]
 
-fig, axs = plt.subplots(1, 8, figsize=(12, 2.8))
+fig, axs = plt.subplots(2, 4, figsize=(12, 5))
 ticks = [1, 2, 5, 15, 60]
 x = np.log(budgets)
 
@@ -58,16 +58,17 @@ for ax, benchmark in zip(axs.reshape(-1), benchmarks):
     ax.grid()
     ax.set_xticks(np.log(ticks))
     ax.set_xticklabels(ticks)
-    ax.set_title(names[benchmark.replace(".npz", "").replace("-", "_")])
+    ax.set_title(names[benchmark.replace(".npz", "").replace("-", "_")], fontsize=14)
 
-axs[0].set_yticks([10, 12, 14, 16, 18, 20, 22])
-axs[2].set_yticks([12, 14, 16, 18, 20, 22])
+axs[0,0].set_yticks([10, 12, 14, 16, 18, 20, 22])
+axs[0,2].set_yticks([12, 14, 16, 18, 20, 22])
 # axs[1, 3].set_yticks(([3, 4, 5, 6, 7]))
-axs[0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom')
-axs[0].set_xlabel(
-    "Total Compute Budget (minutes) $\longrightarrow$", loc='left')
-fig.tight_layout(h_pad=0., w_pad=-1.5)
-axs[-1].legend(
-    ncols=4, loc='upper right', bbox_to_anchor=(1.05, -0.09), frameon=False)
+axs[-1,0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom', fontsize=13)
+axs[-1,0].set_xlabel(
+    "Total Compute Budget (minutes) $\longrightarrow$", loc='left', fontsize=13)
+fig.tight_layout(h_pad=0.8, w_pad=0.8)
+plt.subplots_adjust(bottom=0.16)
+axs[-1,-1].legend(
+    ncols=2, loc='upper right', bbox_to_anchor=(1.05, -0.09), frameon=False, fontsize=13)
 
 fig.savefig("figures/simulation_budget.pdf")
