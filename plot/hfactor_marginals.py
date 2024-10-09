@@ -30,7 +30,7 @@ def _show(ax, chunks):
     return ax.imshow(normalized[order].T, aspect='auto')
 
 
-fig, axs = plt.subplots(2, 1, figsize=(13, 5))
+fig, axs = plt.subplots(2, 1, figsize=(12, 5))
 im1 = _show(axs[0], by_device)
 im2 = _show(axs[1], by_density)
 axs[0].set_title("Devices", loc='left', fontsize=14)
