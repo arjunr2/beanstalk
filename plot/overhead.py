@@ -89,7 +89,7 @@ Y = np.exp(np.mean(np.log(stack), axis=0))
 axbig.errorbar(
     densities, np.mean(Y, axis=0),
     yerr=np.std(Y, axis=0, ddof=1) / np.sqrt(Y.shape[1]) * 2,
-    capsize=2, marker='.')
+    capsize=4, marker='.', markersize=10)
 
 axbig.grid()
 axbig.xaxis.set_major_formatter(PercentFormatter())
