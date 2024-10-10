@@ -8,12 +8,9 @@ z = np.load("summary/thread.npz")
 x = np.load("summary/input-dep.npz")
 
 fig = plt.figure(figsize=(10,3.2))
-gs1 = fig.add_gridspec(ncols=2, nrows=1, left=0.04, right=0.50, wspace=0.03)
-gs2 = fig.add_gridspec(ncols=2, nrows=1, left=0.52, right=0.98, wspace=0.03)
-#gs1.tight_layout(fig)
-#gs2.tight_layout(fig)
+gs1 = fig.add_gridspec(ncols=2, nrows=1, left=0.04, right=0.48, wspace=0.03)
+gs2 = fig.add_gridspec(ncols=2, nrows=1, left=0.50, right=0.94, wspace=0.03)
 axs = [fig.add_subplot(v) for v in gs1] + [fig.add_subplot(v) for v in gs2]
-#fig, axs = plt.subplots(1, 4, figsize=(10, 3.5))
 im1 = axs[0].imshow(z['K'][:, :, 4] / z['n'])
 im2 = axs[1].imshow(x['K'][:, :, -1] / x['n'])
 im3 = axs[2].imshow(z['K'][:, :, 20] / z['n'])
@@ -34,11 +31,10 @@ axs[2].text(
 
 
 fig.tight_layout()
-fig.subplots_adjust(top=1)
-cbar_ax = fig.add_axes([0.63, 0.08, 0.35, 0.04])
-fig.colorbar(im1, cax=cbar_ax, orientation='horizontal')
-cbar_ax.set_xticks([])
-cbar_ax.set_xlabel(
-    "Higher Probability of Detection $\longrightarrow$", loc='left', fontsize=12)
+cbar_ax = fig.add_axes([0.96, 0.14, 0.015, 0.71])
+fig.colorbar(im1, cax=cbar_ax, orientation='vertical')
+cbar_ax.set_yticks([])
+cbar_ax.set_ylabel(
+    "Higher Detection Probability $\longrightarrow$", loc='bottom', fontsize=11)
 
 fig.savefig("figures/hero.pdf")
