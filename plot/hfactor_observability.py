@@ -1,17 +1,14 @@
 """Heisen Factor vs Observability."""
 
-from matplotlib import pyplot as plt
-import numpy as np
 import os
 
+import numpy as np
+from matplotlib import pyplot as plt
 
 npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
 }
-q1 = 0
-median = 2
-q3 = 4
 names = {
     "thread": "fibonacci",
     "thread_lock": "fibonacci-lock",
@@ -51,20 +48,21 @@ fig, axs = plt.subplots(2, width+subcols, figsize=(10, 4), sharey=True, sharex=T
 gs = axs[0,0].get_gridspec()
 
 # Axes for all benchmark specific plots
-subaxs = axs[:, :width]
-for ax in subaxs.reshape(-1):
+for ax in axs[:, :width].reshape(-1):
     ax.remove()
 axbig = fig.add_subplot(gs[:, :width])
 
 
-for i, (k, v) in enumerate(npz.items()):
+benchmarks = sorted(names.keys(), key=lambda x: names[x])
+for ax, name in zip(axs[:, width:].reshape(-1), benchmarks):
+    v = npz[name + ".npz"]
     X = v['X_max']
     y = v["F"]
     mask = np.sum(v['K'], axis=(0, 1)) > 10
     X = X[mask]
     y = y[mask]
-    _scatter_ax(axs[i//subcols, width + (i % subcols)], X[:, median], y[:, 0], title=names[k[:-4]])
-    axbig.scatter(X[:, median], y[:, 0], marker='.', color='C0', s=48)
+    _scatter_ax(ax, X, y, title=names[name])
+    axbig.scatter(X, y, marker='.', color='C0', s=48)
 
 axbig.grid()
 axbig.set_ylabel(r"Heisen Factor", fontsize=major_fontsize)

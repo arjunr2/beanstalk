@@ -1,15 +1,14 @@
 """Detectability Profile Poster (paper version)."""
 
-from matplotlib import pyplot as plt
-import numpy as np
 import os
 
+import numpy as np
+from matplotlib import pyplot as plt
 
 npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
 }
-lower = 0
 
 rows = []
 F = []
@@ -17,7 +16,7 @@ for k, v in npz.items():
     for i in range(v['K'].shape[-1]):
         if np.sum(v['K'][:, :, i]) > 10:
             rows.append(v['K'][:, :, i] / v['n'])
-            F.append(v['F'][i, lower])
+            F.append(v['F'][i])
 
 F = np.array(F)
 order = np.argsort(F)
@@ -43,10 +42,13 @@ for ax in axs[-1, -8:]:
 
 fig.tight_layout(h_pad=0.3, w_pad=-0.2)
 axs[-1, 0].set_xlabel(
-    "Increasing Instrumentation Density $\longrightarrow$", loc='left', fontsize=12)
+    r"Increasing Instrumentation Density $\longrightarrow$",
+    loc='left', fontsize=12)
 axs[-1, 0].set_ylabel(
-    "Different Devices $\longrightarrow$", loc='bottom', fontsize=12)
+    r"Different Devices $\longrightarrow$", loc='bottom', fontsize=12)
 axs[-1, -1].set_xlabel(
-    "$\longleftarrow$ Decreasing Instrumentation Density", loc='right', fontsize=12)
-axs[0, 0].set_ylabel("$\longleftarrow$ Different Devices", loc='top', fontsize=12)
+    r"$\longleftarrow$ Decreasing Instrumentation Density",
+    loc='right', fontsize=12)
+axs[0, 0].set_ylabel(
+    "$\longleftarrow$ Different Devices", loc='top', fontsize=12)
 fig.savefig("figures/poster.pdf", bbox_inches='tight')
