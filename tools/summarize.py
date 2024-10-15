@@ -1,19 +1,16 @@
 """Calculate summary statistics."""
 
 import numpy as np
-from jax import random, vmap
 from jax import numpy as jnp
-from jaxtyping import UInt, Bool, Array, Float, Integer, PRNGKeyArray
+from jax import random, vmap
+from jax.scipy.stats import gaussian_kde
+from jaxtyping import Array, Bool, Float, Integer, PRNGKeyArray, UInt
 
 
 def _parse(p):
     p.add_argument("-p", "--path", help="Path to benchmark in dataset.")
     p.add_argument("-o", "--out", help="Output file.")
     p.add_argument("-s", "--seed", help="Random seed.", type=int, default=42)
-    p.add_argument(
-        "--quantile", type=float, nargs='+',
-        default=[0.05, 0.25, 0.5, 0.75, 0.95],
-        help="Confidence interval bounds.")
     p.add_argument(
         "--samples", type=int, default=10000,
         help="Number of samples for monte carlo simulation.")
@@ -46,14 +43,21 @@ def _get_summary_matrix(path) -> tuple[
     return summary, runs, devices, densities, reentrant
 
 
+def sample_map(x: Float[Array, "Nd"], clip: float = 1.0, n: int = 100):
+    """Get sample MAP."""
+    left, right = jnp.nanpercentile(x, jnp.array([clip, 100 - clip]))
+    query = jnp.linspace(left, right, n)
+    eval = gaussian_kde(x).evaluate(query)
+    return query[jnp.argmax(eval)]
+
+
 def heisenness_ci(
     key: PRNGKeyArray,
     K: Integer[Array, "Nv Nd"], N: Integer[Array, "Nv Nd"],
-    delta: Float[Array, "Nd"],
-    q: Float[Array, "Nq"], samples: int = 100000, correction: int = 2
+    delta: Float[Array, "Nd"], samples: int = 100000, correction: int = 2
 ):
     """Get quantiles for the heisen-ness of a bug.
-    
+
     Notes
     -----
     Devices (Nv) are always placed on the 0 axis, and densities (Nd) on the 1
@@ -97,10 +101,11 @@ def heisenness_ci(
     X_max = jnp.nanmax(X.reshape(-1, samples), axis=0)
     X_mean = jnp.nanmean(X.reshape(-1, samples), axis=0)
     heisen_factor = jnp.nanstd(X.reshape(-1, samples), axis=0) / X_mean
+
     return (
-        jnp.nanquantile(X, q, axis=2),
-        jnp.nanquantile(X_max, q),
-        jnp.quantile(heisen_factor, q))
+        vmap(vmap(sample_map))(X),
+        sample_map(X_max),
+        sample_map(heisen_factor))
 
 
 def _main(args):
@@ -110,8 +115,6 @@ def _main(args):
     K = jnp.array(summary[:, 1:, :])
     N = jnp.array(n[:, 1:])
     delta = jnp.array(delta[1:] / 100)
-    # Target quantiles
-    q = jnp.array(args.quantile)
 
     key = random.PRNGKey(args.seed)
     keys = random.split(key, K.shape[-1])
@@ -122,11 +125,11 @@ def _main(args):
     for key, k, r in _iter:
         ci.append(heisenness_ci(
             key, k, N, delta=delta, samples=args.samples,
-            q=q, correction=1 if r else 2))
+            correction=1 if r else 2))
 
     X, X_max, F = list(zip(*ci))
     np.savez(
         args.out, F=np.array(F),
         X=np.array(X), X_max=jnp.array(X_max),
         K=K, n=N, reentrant=reentrant,
-        device=devices, delta=delta, q=np.array(args.quantile))
+        device=devices, delta=delta)

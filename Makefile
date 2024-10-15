@@ -24,6 +24,7 @@ data/%: data-raw/%
 # -- Summary Statistics -------------------------------------------------------
 
 BENCHMARKS=$(shell ls data/beanstalk)
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
 .phony: all-summary
 all-summary: summary \

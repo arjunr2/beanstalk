@@ -1,15 +1,14 @@
 """Detectability Profile Poster (slide version)."""
 
-from matplotlib import pyplot as plt
-import numpy as np
 import os
 
+import numpy as np
+from matplotlib import pyplot as plt
 
 npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
 }
-lower = 2
 
 rows = []
 F = []
@@ -17,7 +16,7 @@ for k, v in npz.items():
     for i in range(v['K'].shape[-1]):
         if np.sum(v['K'][:, :, i]) > 10:
             rows.append(v['K'][:, :, i] / v['n'])
-            F.append(v['F'][i, lower])
+            F.append(v['F'][i])
 
 F = np.array(F)
 order = np.argsort(F)

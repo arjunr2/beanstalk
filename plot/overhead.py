@@ -1,9 +1,10 @@
 """Instrumentation Overhead."""
 
-import numpy as np
-from matplotlib import pyplot as plt
 import os
-from jaxtyping import UInt, Float
+
+import numpy as np
+from jaxtyping import Float, UInt
+from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
 major_fontsize = 12
@@ -69,18 +70,19 @@ fig, axs = plt.subplots(2, width+subcols, figsize=(10, 4), sharex=True, sharey=T
 gs = axs[0,0].get_gridspec()
 
 # Axes for all benchmark specific plots and aggregate plot
-subaxs = axs[:, :width]
-for ax in subaxs.reshape(-1):
+for ax in axs[:, :width].reshape(-1):
     ax.remove()
 axbig = fig.add_subplot(gs[:, :width])
 
 densities = np.arange(21) * 5
 
 stack = []
-for i, (k, (t, devices, densities)) in enumerate(runtimes.items()):
+benchmarks = sorted(names.keys(), key=lambda x: names[x])
+for ax, name in zip(axs[:, width:].reshape(-1), benchmarks):
+    t, devices, densities = runtimes[name]
     mask = (devices != 18) & (devices != 17) & (devices != 20)
     Y_bench = (t / t[:, 0][:, None])[mask]
-    _plot_ax(axs[i//subcols, width + (i % subcols)], densities, Y_bench, title=names[k])
+    _plot_ax(ax, densities, Y_bench, title=names[name])
     stack.append(Y_bench)
 
 stack: Float[np.ndarray, "benchmark device density"] = np.array(stack)
