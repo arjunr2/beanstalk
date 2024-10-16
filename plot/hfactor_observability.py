@@ -21,7 +21,7 @@ names = {
 }
 
 xticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
-yticks = [0, 2.5, 5, 7.5, 10]
+yticks = [0, 2.5, 5, 7.5, 10, 12.5]
 major_fontsize=12
 minor_fontsize=11
 
