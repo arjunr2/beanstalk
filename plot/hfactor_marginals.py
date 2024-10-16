@@ -48,7 +48,7 @@ for ax in axs:
 fig.tight_layout()
 
 fig.subplots_adjust(right=0.94)
-cbar_ax = fig.add_axes((0.96, 0.075, 0.01, 0.85))
+cbar_ax = fig.add_axes((0.955, 0.075, 0.01, 0.85))
 cbar_ax.tick_params(labelsize=13)
 fig.colorbar(im1, cax=cbar_ax)
 
