@@ -60,9 +60,6 @@ for ax, benchmark in zip(axs.reshape(-1), benchmarks):
     ax.set_xticklabels(ticks)
     ax.set_title(names[benchmark.replace(".npz", "").replace("-", "_")], fontsize=14)
 
-axs[0,0].set_yticks([10, 12, 14, 16, 18, 20, 22])
-axs[0,2].set_yticks([12, 14, 16, 18, 20, 22])
-# axs[1, 3].set_yticks(([3, 4, 5, 6, 7]))
 axs[-1,0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom', fontsize=13)
 axs[-1,0].set_xlabel(
     "Total Compute Budget (minutes) $\longrightarrow$", loc='left', fontsize=13)

@@ -27,7 +27,7 @@ for name, path in methods.items():
     data[name] = np.concatenate(bugs)
 
 
-fig, axs = plt.subplots(2, 1, figsize=(5, 3.75), height_ratios=(1, 5), sharex=True)
+fig, axs = plt.subplots(2, 1, figsize=(6, 3.75), height_ratios=(1, 5), sharex=True)
 
 for k, v in data.items():
     for ax in axs:
@@ -66,14 +66,14 @@ fig.tight_layout(h_pad=0.0)
 
 sty = {
     "ha": "center", "va": "center", "fontsize": 12, "backgroundcolor": "white"}
-axs[1].text(0.93, 0.6, "$(1)$", **sty)
-axs[1].text(0.65, 0.46, "$(2)$", **sty)
+axs[1].text(0.93, 0.58, "$(1)$", **sty)
+axs[1].text(0.65, 0.45, "$(2)$", **sty)
 axs[1].text(0.18, 0.39, "$(3)$", **sty)
 axs[1].annotate(
-    '', xy=(0, 0.34), xytext=(0.38, 0.37), arrowprops={"arrowstyle": "<->"})
+    '', xy=(-0.01, 0.34), xytext=(0.36, 0.38), arrowprops={"arrowstyle": "<->"})
 axs[1].annotate(
-    '', xy=(0.38, 0.37), xytext=(0.97, 0.5), arrowprops={"arrowstyle": "<->"})
+    '', xy=(0.35, 0.38), xytext=(0.97, 0.47), arrowprops={"arrowstyle": "<->"})
 axs[1].annotate(
-    '', xy=(0.97, 0.5), xytext=(0.97, 0.7), arrowprops={"arrowstyle": "<->"})
+    '', xy=(0.97, 0.47), xytext=(0.97, 0.73), arrowprops={"arrowstyle": "<->"})
 
 fig.savefig("figures/cdf.pdf")
