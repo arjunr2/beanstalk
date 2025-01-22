@@ -29,13 +29,14 @@ def _show(ax, chunks):
     return ax.imshow(normalized[order].T, aspect='auto')
 
 
+plt.rcParams.update({'font.size': 13})
 fig, axs = plt.subplots(2, 1, figsize=(12, 5))
 im1 = _show(axs[0], by_device)
 im2 = _show(axs[1], by_density)
-axs[0].set_title("Devices", loc='left', fontsize=14)
-axs[1].set_title("Instrumentation Densities", loc='left', fontsize=14)
+axs[0].set_title("Devices", loc='left')
+axs[1].set_title("Instrumentation Densities", loc='left')
 axs[1].set_xlabel(
-    r"Bugs sorted by Increasing Heisen Factor $\longrightarrow$", loc='left', fontsize=13)
+    r"Bugs sorted by Increasing Heisen Factor $\longrightarrow$", loc='left')
 axs[0].set_ylabel(
     r"$\longleftarrow$ Cluster Devices $\longrightarrow$", loc='center', fontsize=12)
 axs[1].set_ylabel(
@@ -48,9 +49,8 @@ for ax in axs:
 fig.tight_layout()
 
 fig.subplots_adjust(right=0.94)
-cbar_ax = fig.add_axes((0.955, 0.075, 0.01, 0.85))
+cbar_ax = fig.add_axes((0.955, 0.085, 0.01, 0.83))
 cbar_ax.tick_params(labelsize=13)
 fig.colorbar(im1, cax=cbar_ax)
-
 
 fig.savefig("figures/hfactor_marginals.pdf")

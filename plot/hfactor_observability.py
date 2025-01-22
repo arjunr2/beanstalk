@@ -5,6 +5,9 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
+# Number of detections below which we classify the bug as an outlier
+K_threshold = 0
+
 npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
@@ -20,13 +23,13 @@ names = {
     "lfq": "lock-free-queue"
 }
 
-xticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
-yticks = [0, 2.5, 5, 7.5, 10, 12.5]
+xticks = np.linspace(0, 1.0, num = int(1/0.2) + 1)
+yticks = np.linspace(0, 20.0, num = int(20/2.5) + 1)
 major_fontsize=12
 minor_fontsize=11
 
 def _scatter_ax(ax, x, y, title: str):
-    ax.scatter(x, y, marker='.', color='C0', s=48)
+    ax.scatter(x, y, marker='.', color='C0', s=64)
     ax.set_title(title, fontsize=minor_fontsize)
     ax.set_yticks(yticks)
     ax.set_xticks(xticks)
@@ -58,11 +61,11 @@ for ax, name in zip(axs[:, width:].reshape(-1), benchmarks):
     v = npz[name + ".npz"]
     X = v['X_max']
     y = v["F"]
-    mask = np.sum(v['K'], axis=(0, 1)) > 10
+    mask = np.sum(v['K'], axis=(0, 1)) > K_threshold
     X = X[mask]
     y = y[mask]
     _scatter_ax(ax, X, y, title=names[name])
-    axbig.scatter(X, y, marker='.', color='C0', s=48)
+    axbig.scatter(X, y, marker='.', color='C0', s=64)
 
 axbig.grid()
 axbig.set_ylabel(r"Heisen Factor", fontsize=major_fontsize)

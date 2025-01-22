@@ -5,6 +5,10 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
+# Number of detections below which we classify the bug as an outlier
+K_threshold = 0
+start_idx = 0
+
 npz = {
     k: np.load(os.path.join("summary", k))
     for k in os.listdir("summary")
@@ -14,15 +18,15 @@ rows = []
 F = []
 for k, v in npz.items():
     for i in range(v['K'].shape[-1]):
-        if np.sum(v['K'][:, :, i]) > 10:
+        if np.sum(v['K'][:, :, i]) > K_threshold:
             rows.append(v['K'][:, :, i] / v['n'])
             F.append(v['F'][i])
 
 F = np.array(F)
 order = np.argsort(F)
 
-fig, axs = plt.subplots(14, 10, figsize=(9, 12))
-for i, (idx, ax) in enumerate(zip(order, axs.reshape(-1))):
+fig, axs = plt.subplots(11, 10, figsize=(9.5, 10.5))
+for i, (idx, ax) in enumerate(zip(order[start_idx:], axs.reshape(-1))):
     ax.imshow(np.nan_to_num(
         rows[idx], nan=0.0, posinf=0.0, neginf=0.0), aspect='auto')
     ax.text(
