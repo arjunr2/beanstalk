@@ -2,9 +2,9 @@
 
 import json
 import os
-from tqdm import tqdm
 
 import numpy as np
+from tqdm import tqdm
 
 
 def _parse(p):
@@ -45,7 +45,8 @@ def _main(args):
 
         bugs = np.zeros(len(violations[benchmark]), dtype=bool)
         for v in data['violations']:
-            key = (v['i1'], v['i2'])
+            # violation convention: lower-index bug is always first
+            key = (min(v['i1'], v['i2']), max(v['i1'], v['i2']))
             bugs[violations[benchmark][key]] = True
 
         if benchmark not in dataraces:

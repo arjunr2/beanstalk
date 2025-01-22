@@ -1,8 +1,9 @@
 """Get unique violations."""
 
 import json
-from tqdm import tqdm
 import os
+
+from tqdm import tqdm
 
 
 def _parse(p):
@@ -34,7 +35,8 @@ def _main(args):
             violations[benchmark] = set()
 
         for v in data['violations']:
-            key = (v['i1'], v['i2'])
+            # violation convention: lower-index bug is always first
+            key = (min(v['i1'], v['i2']), max(v['i1'], v['i2']))
             if key not in violations[benchmark]:
                 violations[benchmark].add(key)
 
