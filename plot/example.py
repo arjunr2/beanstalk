@@ -34,7 +34,7 @@ def _plot(ax, path):
     im = ax.imshow(Y_normed[:, order], aspect='auto')
     for (j, i), y in np.ndenumerate(Y[:, order]):
         label = format_detectability_label(y)
-        ax.text(i, j, label, ha='center', va='center', fontsize=9, color='purple', fontweight=800)
+        ax.text(i, j, label, ha='center', va='center', fontsize=9, color='sienna', fontweight=800)
     return im
 
 

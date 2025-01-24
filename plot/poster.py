@@ -14,16 +14,30 @@ npz = {
     for k in os.listdir("summary")
 }
 
+acronym = {
+    "thread": "fib",
+    "thread_lock": "fbl",
+    "comp-opt-bug": "cob",
+    "comp-unopt-bug": "cub",
+    "loop-antidep": "ado",
+    "input-dep": "ipd",
+    "indirect": "ida",
+    "lfq": "lfq"
+}
+
 rows = []
 F = []
+benchmarks = []
 for k, v in npz.items():
     for i in range(v['K'].shape[-1]):
         if np.sum(v['K'][:, :, i]) > K_threshold:
             rows.append(v['K'][:, :, i] / v['n'])
             F.append(v['F'][i])
+            benchmarks.append(k)
 
 F = np.array(F)
 order = np.argsort(F)
+bench_acs = [acronym[benchmarks[x][:-4]] for x in order]
 
 fig, axs = plt.subplots(11, 10, figsize=(9.5, 10.5))
 for i, (idx, ax) in enumerate(zip(order[start_idx:], axs.reshape(-1))):
@@ -35,6 +49,9 @@ for i, (idx, ax) in enumerate(zip(order[start_idx:], axs.reshape(-1))):
     ax.text(
         0.02, 0.96, "#{:03}".format(i + 1), ha='left', va='top',
         color='white', transform=ax.transAxes)
+    ax.text(
+        0.98, 0.96, "{}".format(bench_acs[i]), ha='right', va='top',
+        color='white', fontweight='bold', transform=ax.transAxes)
 
 for ax in axs.reshape(-1):
     ax.set_xticks([])

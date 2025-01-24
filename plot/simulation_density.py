@@ -49,7 +49,7 @@ for ax, benchmark in zip(axs.reshape(-1), benchmarks):
         np.mean(np.sum(baseline[benchmark][5], axis=1)),
         color='C1', linestyle='--', label='Baseline', linewidth=2.0)
 
-axs[1,-1].set_yticks([2, 3, 4, 5, 6])
+axs[1,-1].set_yticks([1, 2, 3, 4, 5])
 axs[-1,0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom', fontsize=13)
 axs[-1,0].set_xlabel(
     "Maximum Allowed Instrumentation Density $\longrightarrow$", loc='left', fontsize=13)

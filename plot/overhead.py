@@ -66,7 +66,7 @@ names = {
 
 width = 3
 subcols = len(runtimes) // 2
-fig, axs = plt.subplots(2, width+subcols, figsize=(10, 4), sharex=True, sharey=True)
+fig, axs = plt.subplots(2, width+subcols, figsize=(10, 3.5), sharex=True, sharey=True)
 gs = axs[0,0].get_gridspec()
 
 # Axes for all benchmark specific plots and aggregate plot
