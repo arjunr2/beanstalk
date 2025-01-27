@@ -22,7 +22,8 @@ def _get_summary_matrix(path) -> tuple[
     UInt[np.ndarray, "Nv Nd"],
     UInt[np.ndarray, "Nv"],
     UInt[np.ndarray, "Nd"],
-    Bool[np.ndarray, "Nb"]
+    Bool[np.ndarray, "Nb"],
+    UInt[np.ndarray, "Nb 2"]
 ]:
     npz = np.load(path)
     devices: UInt[np.ndarray, "Nv"] = np.sort(np.unique(npz["device"]))
@@ -30,6 +31,7 @@ def _get_summary_matrix(path) -> tuple[
     reentrant: Bool[np.ndarray, "Nb"] = npz["reentrant"]
     bugs: Bool[np.ndarray, "N Nb"] = np.unpackbits(
         npz["bugs"], axis=1, count=reentrant.shape[0])
+    sites: Uint[np.ndarray, "Nb 2"] = npz["sites"]
 
     shape = (len(devices), len(densities))
     summary: UInt[np.ndarray, "Nv Nd Nb"] = np.zeros(
@@ -40,7 +42,7 @@ def _get_summary_matrix(path) -> tuple[
             mask = (npz["device"] == device) & (npz["density"] == density)
             summary[i, j] = np.sum(bugs[mask], axis=0)
             runs[i, j] = np.sum(mask)
-    return summary, runs, devices, densities, reentrant
+    return summary, runs, devices, densities, reentrant, sites
 
 
 def sample_map(x: Float[Array, "Nd"], clip: float = 1.0, n: int = 100):
@@ -109,7 +111,7 @@ def heisenness_ci(
 
 
 def _main(args):
-    summary, n, devices, delta, reentrant = _get_summary_matrix(args.path)
+    summary, n, devices, delta, reentrant, sites = _get_summary_matrix(args.path)
 
     # Remove 0 instrumentation data
     K = jnp.array(summary[:, 1:, :])
@@ -132,4 +134,5 @@ def _main(args):
         args.out, F=np.array(F),
         X=np.array(X), X_max=jnp.array(X_max),
         K=K, n=N, reentrant=reentrant,
+        sites=sites,
         device=devices, delta=delta)

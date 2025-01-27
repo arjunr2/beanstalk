@@ -64,7 +64,9 @@ def _main(args):
     stacked = {k: _stack(v) for k, v in dataraces.items()}
 
     os.makedirs(args.out, exist_ok=True)
+
     for k, v in stacked.items():
         np.savez(
             os.path.join(args.out, k + '.npz'),
-            reentrant=_get_reentrant(k), **v)
+            reentrant=_get_reentrant(k), sites=np.array(list(violations[k].keys())),
+            **v)
