@@ -20,3 +20,4 @@ Dataset files have the following arrays:
 - `device: uint8[N]`: Device that each run was executed on
 - `density: uint8[N]`: Instrumentation density (%) for each run
 - `bugs: uint8[N, ceil(b/8)] --> bool[N, b]`: Packed bit array indicating whether each bug was discovered on each run. Unpack using `np.unpackbits(arr, axis=1)`.
+- `sites: uint32[b, 2]`: Pair of code indices (in Wasm module) responsible for the bug
