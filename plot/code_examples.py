@@ -31,18 +31,24 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib.patches as patches
 
 
 npz = np.load("summary/thread.npz")
 N = npz['n']
 F, N, K = npz['F'], npz['n'], npz['K']
 bench_sites = npz['sites']
+devices = npz['device']
 
 # Maps the bug site (wasm instruction) to line of source code (C)
 # e.g. code_map[4] corresponds to line of code with access idx 4
 code_map = [0] * 4 + [
     8, 10, 10, 9, 11, 12, 12, 14, 13, 10, 10
 ]
+
+# Devices to highlight in the plot (color + linestyle)
+dev1 = (31, 'red', '--', 'Intel NUC 11 (x86-64 : tigerlake)')
+dev2 = (19, 'magenta', (0, (3,1,1,1)), 'Intel Compute Stick (x86-64 : silvermont)')
 
 toCodeSite = lambda a: (code_map[a[0]], code_map[a[1]])
 
@@ -82,4 +88,19 @@ axs[-1, 0].set_xlabel(
     loc='left', fontsize=12)
 axs[-1, 0].set_ylabel(
     r"$\longleftarrow$ Different Devices $\longrightarrow$", loc='center', fontsize=12)
+
+
+dev1_idx = np.where(devices == dev1[0])[0][0]
+dev2_idx = np.where(devices == dev2[0])[0][0]
+for ax in axs.reshape(-1):
+    ax.add_patch(
+        patches.Rectangle((-0.5, 0.5 + dev1_idx), 20, 1, fill=False, edgecolor=dev1[1], lw=2, ls=dev1[2], label=dev1[3])
+    )
+    ax.add_patch(
+        patches.Rectangle((-0.5, 0.5 + dev2_idx), 20, 1, fill=False, edgecolor=dev2[1], lw=2, ls=dev2[2], label=dev2[3])
+    )
+
+axs[-1,0].legend(
+    ncols=1, loc='lower left', frameon=False, bbox_to_anchor=(-0.05, -0.45), fontsize=12)
+
 fig.savefig("figures/code_examples.pdf", bbox_inches='tight')
