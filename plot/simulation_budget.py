@@ -38,7 +38,7 @@ methods = {
 }
 data = {k: np.load(v) for k, v in methods.items()}
 
-benchmarks = list(data["Beanstalk"].keys())
+benchmarks = sorted(data['Beanstalk'].keys(), key=lambda x: names[x.replace(".npz", "").replace("-", "_")])
 budgets = [1, 2, 5, 10, 15, 30, 60]
 
 fig, axs = plt.subplots(2, 4, figsize=(12, 5))
