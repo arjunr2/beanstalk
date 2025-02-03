@@ -33,7 +33,7 @@ names = {
 }
 beanstalk = np.load("simulations/density.npz")
 baseline = np.load("simulations/baseline.npz")
-benchmarks = list(beanstalk.keys())
+benchmarks = sorted(beanstalk.keys(), key=lambda x: names[x.replace(".npz", "").replace("-", "_")])
 x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 fig, axs = plt.subplots(2, 4, figsize=(12, 5))
@@ -49,7 +49,7 @@ for ax, benchmark in zip(axs.reshape(-1), benchmarks):
         np.mean(np.sum(baseline[benchmark][5], axis=1)),
         color='C1', linestyle='--', label='Baseline', linewidth=2.0)
 
-axs[1,-1].set_yticks([1, 2, 3, 4, 5])
+axs[1,-2].set_yticks([2, 3, 4, 5])
 axs[-1,0].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom', fontsize=13)
 axs[-1,0].set_xlabel(
     "Maximum Allowed Instrumentation Density $\longrightarrow$", loc='left', fontsize=13)
