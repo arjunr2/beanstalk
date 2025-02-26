@@ -13,7 +13,8 @@ gs2 = fig.add_gridspec(ncols=2, nrows=1, left=0.50, right=0.94, wspace=0.03)
 axs = [fig.add_subplot(v) for v in gs1] + [fig.add_subplot(v) for v in gs2]
 im1 = axs[0].imshow(z['K'][:, :, 4] / z['n'])
 im2 = axs[1].imshow(x['K'][:, :, -1] / x['n'])
-im3 = axs[2].imshow(z['K'][:, :, 20] / z['n'])
+# 6, 8, 2, 3, 10
+im3 = axs[2].imshow(z['K'][:, :, 6] / z['n'])
 im4 = axs[3].imshow(x['K'][:, :, 1] / x['n'])
 
 for ax in axs:
