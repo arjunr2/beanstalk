@@ -2,9 +2,9 @@
 
 This repo contains all the data and tools needed to process data for Beanstalk
 
-## Dataset
+## Dataset Structure
 
-Our dataset is organized as follows:
+All assets are included as `*.zip` files in releases. Our dataset is organized as follows:
 
 ```sh
 data-raw/
@@ -18,7 +18,20 @@ data/
         ...
     baseline/           # data used for our 100% instrumented baseline
         ...
+```
 
+Each benchmark file in `data` has the following arrays:
+- `t: uint32[N]`: Execution time (in microseconds) of each run
+- `device: uint8[N]`: Device that each run was executed on
+- `density: uint8[N]`: Instrumentation density (%) for each run
+- `bugs: uint8[N, ceil(b/8)] --> bool[N, b]`: Packed bit array indicating whether each bug was discovered on each run. Unpack using `np.unpackbits(arr, axis=1)`.
+- `sites: uint32[b, 2]`: Pair of code indices (in Wasm module) responsible for the bug
+
+
+### Processed Dataset Structure
+
+The evaluation/processing scripts generate the following processed data: 
+```sh
 summary/                # statistical summarized 'data' directory
     indirect.npz        # different file for each benchmark
     ...
@@ -32,27 +45,15 @@ simulations/
     # Maximum instrumentation density simulation
     density.npz         # Beanstalk ablation (constrained instrumentation density)
 
-
 figures/                # PDF figures generated for the paper
-
 ```
 
-Each benchmark file in `data` has the following arrays:
-- `t: uint32[N]`: Execution time (in microseconds) of each run
-- `device: uint8[N]`: Device that each run was executed on
-- `density: uint8[N]`: Instrumentation density (%) for each run
-- `bugs: uint8[N, ceil(b/8)] --> bool[N, b]`: Packed bit array indicating whether each bug was discovered on each run. Unpack using `np.unpackbits(arr, axis=1)`.
-- `sites: uint32[b, 2]`: Pair of code indices (in Wasm module) responsible for the bug
 
- 
+## Generating Figures from Packaged Data
 
-## Pre-Packaged Data
+Extract  `{data,summary,simulations}.zip` packaged in the release to the root directory of this repo.
 
-Extract  `data.zip`, `summary.zip`, and `simulations.zip` packaged in the release to the root directory of this repo.
-
-To generate all the figures, run `./gen_figures.sh` which generates the `figures` directory (mirroring `figures.zip`). 
-
-Each `.py` plotting script generates the corresponding `.pdf` with the same basename 
+To generate figures, run `./gen_figures.sh` (ignore any runtime warnings). The output should mirror `figures.zip` . 
 
 
 ## Reproducing Results from Raw Data
@@ -62,8 +63,8 @@ The three zip files for data, summary, and simulations can be reproduced from th
 1. **Extract Raw Data** from `data-raw.zip` to the root directory of the repo.
 2. **Data**: Run `./gen_data.sh` (approx. 2 min to run).
 3. **Summary**: Run `./summarize.sh` (approx. 2 min to run on GPU).
-4. **Simulations**: Run `./run_simulations.sh` (approx. 20 min to run on GPU).
-5. Generate figures as in [previous section](#pre-packaged-data).
+4. **Simulations**: Run `./run_simulations.sh` (approx. 20 min to run 10000 replicates on GPU). If necessary, replicates can be configured with first argument to the script.
+5. Generate figures as in [previous section](#generating-figures-from-pre-packaged-data).
 
 > **NOTES**: 
 > * GPU support for JAX is recommended; CPU backends can be alternatively be used, but may take significantly longer to execute.
