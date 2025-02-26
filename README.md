@@ -1,4 +1,4 @@
-# Beanstalk Data and Processing Artifacts
+# Beanstalk Data and Processing Artifacts [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14933491.svg)](https://doi.org/10.5281/zenodo.14933491)
 
 This repo contains all the data and tools needed to process data for Beanstalk
 
