@@ -1,6 +1,6 @@
 # Beanstalk Data and Processing Artifacts [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14933491.svg)](https://doi.org/10.5281/zenodo.14933491)
 
-This repo contains all the data and tools needed to process data for Beanstalk
+This repo contains all the data and tools needed to process data for Beanstalk. The data/software is attached to both the above Zenodo DOI and Github Releases.
 
 ## Dataset Structure
 
@@ -51,7 +51,7 @@ figures/                # PDF figures generated for the paper
 
 ## Generating Figures from Packaged Data
 
-Extract  `{data,summary,simulations}.zip` packaged in the release to the root directory of this repo.
+Extract  `{data,summary,simulations}.zip` packaged in Zenodo/Github releases to the root directory of this repo.
 
 To generate figures, run `./gen_figures.sh` (ignore any runtime warnings). The output should mirror `figures.zip` . 
 
