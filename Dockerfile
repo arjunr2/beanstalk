@@ -9,13 +9,13 @@ ARG USERNAME=evaluator
 RUN groupadd -g "${PGID}" "${USERNAME}" && \
     useradd -u "${PUID}" -g "${USERNAME}" -m -s /bin/bash "${USERNAME}"
 
+ENV PATH="$HOME/.local/bin:$PATH"
+RUN pip3 install --upgrade pip
+RUN pip3 install matplotlib jaxtyping tqdm
+RUN pip3 install -U "jax[cuda12]"
+
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
-RUN pip3 install --upgrade pip
-RUN pip3 install matplotlib
-RUN pip3 install jaxtyping
-RUN pip3 install tqdm
-RUN pip3 install -U "jax[cuda12]"
 
 ENTRYPOINT ["bash"]
