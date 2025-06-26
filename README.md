@@ -23,7 +23,7 @@ docker run -it --gpus all --rm -v "`pwd`:/home/evaluator" beanstalk
 
 
 
-## Pre-Packaged Data: Generating Figures
+## Generating Figures (From Pre-Processed Data)
 
 Extract `{data,summary,simulations}.zip` packaged in Zenodo/Github releases to the root directory of this repo.
 
@@ -38,7 +38,7 @@ The contained directories  `data`, `summary`, and `simulations` above can be rep
 2. **Data**: Run `./gen_data.sh` (approx. 2 min to run).
 3. **Summary**: Run `./summarize.sh` (approx. 2 min to run on GPU).
 4. **Simulations**: Run `./run_simulations.sh` (approx. 20 min to run 10000 replicates on GPU). If necessary, replicates can be configured with first argument to the script.
-5. Generate figures as in [previous section](#generating-figures-from-pre-packaged-data).
+5. **Figures**: Run `./gen_figures.sh` (as in the [previous section](#generating-figures-from-pre-processed-data)).
 
 > **NOTES**: 
 > * GPU support for JAX is recommended; CPU backends can be alternatively be used, but may take significantly longer to execute.
