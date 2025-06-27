@@ -49,7 +49,7 @@ The total artifact will require the following:
 
 You need two software repositories:
 * *Dataset*: https://doi.org/10.5281/zenodo.14927586
-* *Scripts*: https://github.com/arjunr2/beanstalk (release v2.0.2). This is also mirrored at https://doi.org/10.5281/zenodo.14933491
+* *Scripts*: https://github.com/arjunr2/beanstalk (release v2.0.4). This is also mirrored at https://doi.org/10.5281/zenodo.14933491
 
 To start, do the following:
 
