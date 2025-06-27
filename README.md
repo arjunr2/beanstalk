@@ -1,6 +1,6 @@
 # Beanstalk Data and Processing Artifacts [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14933491.svg)](https://doi.org/10.5281/zenodo.14933491)
 
-This repo contains all the data and tools needed to process data for Beanstalk. The dataset can be found on [Zenodo](https://doi.org/10.5281/zenodo.14927586) here. See the [dataset explainer](DATASET-EXPLAINER.md) for details on dataset structure if necessary.
+This repo contains all the data and tools needed to process data for Beanstalk. The dataset can be found on [Zenodo](https://doi.org/10.5281/zenodo.14927586) here. See the [artifact overview](ARTIFACT-OVERVIEW.md) for usage instructions and [dataset explainer](DATASET-EXPLAINER.md) for details on dataset structure if necessary.
 
 ## Environment Setup
 Python with JAX, `matplotlib`, and `tqdm` packages are needed.
