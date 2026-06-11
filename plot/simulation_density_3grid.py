@@ -67,4 +67,4 @@ legend_ax.legend(handles, labels, loc='center left', ncols=1, frameon=False, fon
 
 fig.tight_layout(h_pad=0.8, w_pad=0.8)
 
-fig.savefig("figures/simulation_density.pdf", bbox_inches='tight', pad_inches=0.05)
+fig.savefig("figures/simulation_density_3grid.pdf", bbox_inches='tight', pad_inches=0.05)
