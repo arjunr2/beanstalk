@@ -1,0 +1,70 @@
+"""Plot density simulation."""
+
+import numpy as np
+from matplotlib import pyplot as plt
+from jaxtyping import Num
+from matplotlib.ticker import PercentFormatter
+
+
+def _plot_ci(
+    ax, x: Num[np.ndarray, "X"], y: Num[np.ndarray, "X S"], label: str,
+    eps: float = 5, **kwargs
+) -> None:
+    y = y.astype(float)
+    y[y < 0] = np.nan
+
+    lower, upper = np.percentile(y, [eps, 100 - eps], axis=1)
+    middle = np.mean(y, axis=1)
+
+    yerr = [np.maximum(0.0, middle - lower), np.maximum(0.0, upper - middle)]
+
+    ax.errorbar(x, middle, yerr=yerr, label=label, capsize=5, **kwargs)
+
+
+names = {
+    "thread": "fibonacci",
+    "thread_lock": "fibonacci-lock",
+    "comp_opt_bug": "comp-opt-bug",
+    "comp_unopt_bug": "comp-unopt-bug",
+    "loop_antidep": "antidep1-orig",
+    "input_dep": "input-dep",
+    "indirect": "indirectaccess",
+    "lfq": "lock-free-queue"
+}
+beanstalk = np.load("simulations/density.npz")
+baseline = np.load("simulations/baseline.npz")
+benchmarks = sorted(beanstalk.keys(), key=lambda x: names[x.replace(".npz", "").replace("-", "_")])
+x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+# Regular 3x3 grid: 8 benchmark panels fill cells 0-7; the last cell (bottom
+# right) is left empty for the legend.
+fig, axs = plt.subplots(3, 3, figsize=(9.5, 8))
+axs_list = axs.reshape(-1)
+for ax, benchmark in zip(axs_list, benchmarks):
+    _plot_ci(
+        ax, x, np.sum(beanstalk[benchmark], axis=2),
+        label='Beanstalk', marker='D', linestyle='-', color='C0')
+    ax.grid()
+    ax.xaxis.set_major_formatter(PercentFormatter())
+    ax.set_title(
+        names[benchmark.replace(".npz", "").replace("-", "_")], fontsize=14)
+    ax.axhline(
+        np.mean(np.sum(baseline[benchmark][5], axis=1)),
+        color='C1', linestyle='--', label='Baseline', linewidth=2.0)
+
+axs_list[6].set_yticks([2, 3, 4, 5])
+# Global axis labels anchored to the bottom-left panel (now at the grid corner).
+axs_list[6].set_ylabel("Number of Bugs Found $\longrightarrow$", loc='bottom', fontsize=13)
+axs_list[6].set_xlabel(
+    "Maximum Allowed Instrumentation Density $\longrightarrow$", loc='left', fontsize=13)
+
+# Use the empty bottom-right cell for the legend.
+legend_ax = axs_list[8]
+legend_ax.axis('off')
+handles, labels = axs_list[0].get_legend_handles_labels()
+legend_ax.legend(handles, labels, loc='center left', ncols=1, frameon=False, fontsize=13,
+                 labelspacing=1.0)
+
+fig.tight_layout(h_pad=0.8, w_pad=0.8)
+
+fig.savefig("figures/simulation_density.pdf", bbox_inches='tight', pad_inches=0.05)
