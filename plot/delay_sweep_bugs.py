@@ -5,13 +5,50 @@ Layout mirrors hfactor_observability.py: a large "Aggregate" panel on the left
 that figure, the y-axis tick numbers are shown, since the counts are the point.
 """
 
+import json
 import os
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from delay_sweep import bugs_caught, load, load_beanstalk
+DATA = "delay-sweep/baseline"
+VIOLATIONS = "data/violations.json"
+
+
+def load(base=DATA):
+    """Load each benchmark's aggregated .npz from the delay-sweep dataset."""
+    return {
+        os.path.splitext(f)[0]: np.load(os.path.join(base, f))
+        for f in sorted(os.listdir(base)) if f.endswith(".npz")
+    }
+
+
+def unpack_bugs(v):
+    """Unpack a benchmark's per-run bug bit-vectors to shape (n_runs, n_sites)."""
+    n_sites = v["sites"].shape[0]
+    return np.unpackbits(v["bugs"], axis=-1)[:, :n_sites].astype(bool)
+
+
+def bugs_caught(npz):
+    """Distinct bugs caught per delay, per benchmark (union of runs at that delay)."""
+    out = {}
+    for name, v in npz.items():
+        bugs = unpack_bugs(v)
+        delay = v["delay"]
+        out[name] = {
+            int(d): int(bugs[delay == d].any(axis=0).sum())
+            for d in np.unique(delay)
+        }
+    return out
+
+
+def load_beanstalk(path=VIOLATIONS):
+    """Distinct violation pairs found by beanstalk, per benchmark."""
+    with open(path) as f:
+        data = json.load(f)
+    return {name: {tuple(p) for p in pairs} for name, pairs in data.items()}
+
 
 names = {
     "thread": "fibonacci",

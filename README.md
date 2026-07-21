@@ -34,8 +34,8 @@ To generate figures, run `./gen_figures.sh` (ignore any runtime warnings). The o
 
 The contained directories  `data`, `summary`, and `simulations` above can be reproduced from the raw cluster data, following these steps:
 
-1. **Extract Raw Data** from `data-raw.zip` to the root directory of the repo.
-2. **Data**: Run `./gen_data.sh` (approx. 2 min to run).
+1. **Extract Raw Data** from `{data-raw,delay-sweep-raw}.zip` to the root directory of the repo.
+2. **Data**: Run `./gen_data.sh` and `./gen_delay_sweep.sh' (approx. 2 min to run).
 3. **Summary**: Run `./summarize.sh` (approx. 2 min to run on GPU).
 4. **Simulations**: Run `./run_simulations.sh` (approx. 20 min to run 10000 replicates on GPU). If necessary, replicates can be configured with first argument to the script.
 5. **Figures**: Run `./gen_figures.sh` (as in the [previous section](#generating-figures-from-pre-processed-data)).

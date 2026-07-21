@@ -22,6 +22,9 @@ python3 plot/example.py
 python3 plot/poster.py
 
 # Figure 13
+python3 plot/delay_sweep_bugs.py
+
+# Figure 13
 python3 plot/cdf.py
 
 # Figure 14
