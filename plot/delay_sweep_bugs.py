@@ -14,6 +14,7 @@ from matplotlib.ticker import MaxNLocator
 
 DATA = "delay-sweep/baseline"
 VIOLATIONS = "data/violations.json"
+SUMMARY = "summary"  # detectability summaries used to number the poster panels
 
 
 def load(base=DATA):
@@ -50,6 +51,59 @@ def load_beanstalk(path=VIOLATIONS):
     return {name: {tuple(p) for p in pairs} for name, pairs in data.items()}
 
 
+def baseline_caught(npz):
+    """Site pairs the baseline caught at least once (union over the whole sweep)."""
+    out = {}
+    for name, v in npz.items():
+        bugs = unpack_bugs(v)
+        sites = v["sites"]
+        out[name] = {
+            tuple(sites[i]) for i in range(sites.shape[0]) if bugs[:, i].any()
+        }
+    return out
+
+
+def poster_numbers(base=SUMMARY, K_threshold=0):
+    """Map each (benchmark, site pair) to its poster panel number and F value.
+
+    Mirrors plot/poster.py exactly: iterate summaries in os.listdir order, keep
+    bugs with detection count above K_threshold, then rank by increasing F. The
+    panel number printed as "#NNN" on the poster is that rank (1-based).
+    """
+    npz = {k: np.load(os.path.join(base, k)) for k in os.listdir(base)}
+    F, bench, pair = [], [], []
+    for k, v in npz.items():
+        for i in range(v["K"].shape[-1]):
+            if np.sum(v["K"][:, :, i]) > K_threshold:
+                F.append(v["F"][i])
+                bench.append(os.path.splitext(k)[0])
+                pair.append(tuple(v["sites"][i]))
+    F = np.array(F)
+    out = {}
+    for rank, idx in enumerate(np.argsort(F), start=1):
+        out[(bench[idx], pair[idx])] = (rank, float(F[idx]))
+    return out
+
+
+def print_missing_table(beanstalk_pairs, caught, poster):
+    """Print bugs found by beanstalk but missed by the baseline, with poster #s."""
+    rows = []
+    for name, pairs in beanstalk_pairs.items():
+        for p in pairs - caught.get(name, set()):
+            num, f = poster.get((name, p), (None, float("nan")))
+            rows.append((num if num is not None else 1 << 30, name, p, f))
+    rows.sort()
+
+    total = sum(len(v) for v in beanstalk_pairs.values())
+    print(f"\nBugs found by Beanstalk but NOT the baseline: "
+          f"{len(rows)} / {total}\n")
+    print(f"{'poster#':>7}  {'benchmark':<16} {'sites':<16} {'F':>7}")
+    print(f"{'-' * 7}  {'-' * 16} {'-' * 16} {'-' * 7}")
+    for num, name, p, f in rows:
+        label = f"#{num:03d}" if num < (1 << 30) else "n/a"
+        print(f"{label:>7}  {names[name]:<16} {str(tuple(p)):<16} {f:>7.2f}")
+
+
 names = {
     "thread": "fibonacci",
     "thread_lock": "fibonacci-lock",
@@ -61,8 +115,8 @@ names = {
     "lfq": "lock-free-queue",
 }
 
-major_fontsize = 12
-minor_fontsize = 11
+major_fontsize = 14
+minor_fontsize = 13
 
 SWEEP = "C0"     # the delay-sweep curve
 CEILING = "C3"   # beanstalk ceiling line
@@ -109,7 +163,7 @@ agg = [sum(caught[name].get(d, 0) for name in caught) for d in delays]
 agg_ceiling = sum(beanstalk.values())
 _plot_sweep(axbig, agg, agg_ceiling, title="Aggregate", ms=7, xlabels=True)
 axbig.set_title("Aggregate", fontsize=major_fontsize)
-axbig.set_ylabel("Distinct bugs caught", fontsize=major_fontsize)
+axbig.set_ylabel("# of Bugs Detected", fontsize=major_fontsize)
 axbig.set_xlabel(r"Delay Window ($\mu$)", fontsize=major_fontsize)
 axbig.set_ylim(0, 120)
 axbig.set_yticks(np.arange(0, 121, 15))  # a horizontal line every 15
@@ -123,5 +177,9 @@ for ax, name in zip(axs[:, width:].reshape(-1), benchmarks):
     y = [caught[name].get(d, 0) for d in delays]
     _plot_sweep(ax, y, beanstalk[name], title=names[name])
 
-fig.tight_layout()
+fig.tight_layout(w_pad=0.0)
 fig.savefig("figures/delay_sweep_bugs.pdf", bbox_inches="tight")
+
+# Summary: which beanstalk-found bugs the baseline never caught, mapped to the
+# poster panel numbers (plot/poster.py) via increasing detectability factor F.
+print_missing_table(load_beanstalk(), baseline_caught(npz), poster_numbers())
